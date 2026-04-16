@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Childbirth Quiz</title>
+
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom right, #ffe4ec, #ffd6e8);
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  height: 100vh;
+  margin: 0;
+}
+
+.quiz-container {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 700px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  text-align: center;
+}
+
+h1 {
+  color: #d63384;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+h3 {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff69b4, #ff85c1);
+  color: white;
+  font-size: 18px;
+  transition: all 0.25s ease;
+}
+
+button:hover {
+  transform: scale(1.03);
+  background: linear-gradient(135deg, #ff4da6, #ff6fb5);
+}
+
+.feedback {
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+.correct {
+  color: #28a745;
+}
+
+.incorrect {
+  color: #dc3545;
+}
+
+.hidden {
+  display: none;
+}
+
+#confetti {
+  font-size: 40px;
+  margin-top: 20px;
+}
+
+.start-screen {
+  padding: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="quiz-container">
+
+  <!-- Start Screen -->
+  <div id="startScreen" class="start-screen">
+    <h1>💖 Childbirth Quiz 💖</h1>
+    <p>Test your knowledge about childbirth!</p>
+    <button onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <!-- Quiz Content -->
+  <div id="quizContent" class="hidden">
+    <div id="question"></div>
+    <div id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+    <button id="nextBtn" class="hidden">Next Question</button>
+  </div>
+
+  <!-- Results -->
+  <div id="result" class="hidden"></div>
+  <button id="restartBtn" class="hidden">Restart Quiz</button>
+
+  <div id="confetti"></div>
+
+</div>
+
+<script>
+const quiz = [
+  {
+    question: "What hormone is primarily responsible for triggering contractions during labor?",
+    options: ["Estrogen", "Oxytocin", "Progesterone", "Insulin"],
+    answer: 1,
+    explanation: "Oxytocin stimulates uterine contractions and plays a key role in labor."
+  },
+  {
+    question: "What is the first stage of labor characterized by?",
+    options: ["Delivery of placenta", "Cervical dilation", "Pushing the baby out", "Breastfeeding"],
+    answer: 1,
+    explanation: "The first stage involves the cervix dilating to allow the baby to pass through."
+  },
+  {
+    question: "What is an epidural used for during childbirth?",
+    options: ["Speed up labor", "Monitor the baby", "Provide pain relief", "Deliver oxygen"],
+    answer: 2,
+    explanation: "An epidural is a type of anesthesia used to reduce pain during labor."
+  },
+  {
+    question: "What is the normal duration of pregnancy?",
+    options: ["30 weeks", "40 weeks", "50 weeks", "20 weeks"],
+    answer: 1,
+    explanation: "A full-term pregnancy typically lasts about 40 weeks."
+  },
+  {
+    question: "What is the final stage of labor?",
+    options: ["Contractions begin", "Baby is born", "Placenta is delivered", "Water breaks"],
+    answer: 2,
+    explanation: "The final stage is the delivery of the placenta after the baby is born."
+  }
+];
+
+let currentQuestion = 0;
+let score = 0;
+
+const startScreen = document.getElementById("startScreen");
+const quizContent = document.getElementById("quizContent");
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const feedbackEl = document.getElementById("feedback");
+const nextBtn = document.getElementById("nextBtn");
+const resultEl = document.getElementById("result");
+const restartBtn = document.getElementById("restartBtn");
+const confettiEl = document.getElementById("confetti");
+
+function startQuiz() {
+  startScreen.classList.add("hidden");
+  quizContent.classList.remove("hidden");
+  loadQuestion();
+}
+
+function loadQuestion() {
+  feedbackEl.innerHTML = "";
+  nextBtn.classList.add("hidden");
+
+  const q = quiz[currentQuestion];
+  questionEl.innerHTML = `<h3>${q.question}</h3>`;
+
+  answersEl.innerHTML = "";
+  q.options.forEach((option, index) => {
+    const btn = document.createElement("button");
+    btn.textContent = option;
+    btn.onclick = () => selectAnswer(index);
+    answersEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(selected) {
+  const q = quiz[currentQuestion];
+  const buttons = answersEl.querySelectorAll("button");
+
+  buttons.forEach(btn => btn.disabled = true);
+
+  if (selected === q.answer) {
+    score++;
+    feedbackEl.innerHTML = `<span class="correct">💖 Correct!</span><br>${q.explanation}`;
+  } else {
+    feedbackEl.innerHTML = `<span class="incorrect">💔 Incorrect.</span><br>${q.explanation}`;
+  }
+
+  nextBtn.classList.remove("hidden");
+}
+
+nextBtn.onclick = () => {
+  currentQuestion++;
+  if (currentQuestion < quiz.length) {
+    loadQuestion();
+  } else {
+    showResults();
+  }
+};
+
+function showResults() {
+  quizContent.classList.add("hidden");
+  resultEl.classList.remove("hidden");
+  restartBtn.classList.remove("hidden");
+
+  resultEl.innerHTML = `<h2>You got ${score} out of 5 correct! 💕</h2>`;
+
+  if (score === 5) {
+    launchConfetti();
+  }
+}
+
+function launchConfetti() {
+  // Simple, safe sparkle effect using basic symbols
+  let symbols = "✦✧";
+  let count = 0;
+
+  let interval = setInterval(() => {
+    confettiEl.textContent += symbols[Math.floor(Math.random() * symbols.length)] + " ";
+    count++;
+    if (count > 15) clearInterval(interval);
+  }, 120);
+}
+
+restartBtn.onclick = () => {
+  currentQuestion = 0;
+  score = 0;
+  confettiEl.textContent = "";
+  resultEl.classList.add("hidden");
+  restartBtn.classList.add("hidden");
+  startScreen.classList.remove("hidden");
+};
+</script>
+
+</body>
+</html>
